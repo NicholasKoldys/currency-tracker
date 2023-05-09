@@ -1,0 +1,21 @@
+
+#  * SECRET METHODS
+# https://www.baeldung.com/ops/docker-securing-passwords
+  # docker run --rm --network=host -e 'VAULT_ADDR=http://127.0.0.1:8200' -e 'VAULT_TOKEN=myroot'
+  # vault sh -c 'apk add --update curl jq && vault login -method=token token=${VAULT_TOKEN}
+  # && PASSWORD=$(vault kv get -field=password secret/test) && echo ${PASSWORD}'
+
+
+# My preferred pattern is to use a wrapper script as the ENTRYPOINT or CMD. The wrapper script can first import secrets from an outside location in to the container at run time, then execute the application, providing the secrets. The exact mechanics of this vary based on your run time environment. In AWS, you can use a combination of IAM roles, the Key Management Service, and S3 to store encrypted secrets in an S3 bucket. Something like HashiCorp Vault or credstash is another option.
+
+
+
+# The best way is to use IAM Role and do not deal with credentials at all. (see http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html )
+
+# Credentials could be retrieved from http://169.254.169.254..... Since this is a private ip address, it could be accessible only from EC2 instances.
+
+# All modern AWS client libraries "know" how to fetch, refresh and use credentials from there. So in most cases you don't even need to know about it. Just run ec2 with correct IAM role and you good to go.
+
+# As an option you can pass them at the runtime as environment variables ( i.e docker run -e AWS_ACCESS_KEY_ID=xyz -e AWS_SECRET_ACCESS_KEY=aaa myimage)
+
+# You can access these environment variables by running printenv at the terminal.

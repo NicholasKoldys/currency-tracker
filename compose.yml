@@ -1,0 +1,50 @@
+services:
+  app:
+    # TODO TEMP REMOVE DEBUG
+    # image: go-air:v1
+    # TODO TEMP ENABLE
+    # image: currency-tracker_go:v1
+    container_name: currency-tracker_app
+    hostname: currency-tracker_app
+    restart: always
+    build:
+      context: ./
+      # TODO TEMP REMOVE DEBUG
+      dockerfile: ./.docker/devgo.dockerfile
+      # TODO TEMP ENABLE Bin/exe container
+      # dockerfile: ./.docker/go.dockerfile
+    networks:
+      - backend-net
+    ports:
+      - 8080:8080
+    volumes:
+      - ./src/github.com/nicholaskoldys/currency-tracker:/go/src/app
+    tty: true # TODO REMOVE DEBUG
+    depends_on:
+      - mariadb
+
+  mariadb:
+    image: mariadb:v1
+    container_name: currency-tracker_db
+    hostname: currency-tracker_db
+    restart: always
+    build:
+      context: ./
+      dockerfile: ./.docker/db.dockerfile
+    volumes:
+      - ./persist-data:/var/lib/mysql
+    networks:
+      - backend-net
+    ports:
+      - 3306:3306
+    env_file:
+    #TODO TEMP - change to networking password retrieval
+      - ./.env
+    environment:
+      - TZ=Etc/UTC
+
+# volumes:
+#   persist-data:
+
+networks:
+  backend-net:
